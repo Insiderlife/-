@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗺 Дорожная карта инвестора — 7 шагов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* Header */
+        header {
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        header p {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            opacity: 0.95;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header-info {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .header-info div {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-steps {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-step {
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-step:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        /* Step Card */
+        .step-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease forwards;
+            scroll-margin-top: 100px;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-card:nth-child(1) { animation-delay: 0.1s; }
+        .step-card:nth-child(2) { animation-delay: 0.2s; }
+        .step-card:nth-child(3) { animation-delay: 0.3s; }
+        .step-card:nth-child(4) { animation-delay: 0.4s; }
+        .step-card:nth-child(5) { animation-delay: 0.5s; }
+        .step-card:nth-child(6) { animation-delay: 0.6s; }
+        .step-card:nth-child(7) { animation-delay: 0.7s; }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .step-title-block h2 {
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-duration {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .step-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .content-section {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .content-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .content-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .content-section li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .content-section li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.5rem;
+            line-height: 1.2;
+        }
+
+        /* Resources */
+        .resources {
+            grid-column: 1 / -1;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .resources h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+
+        .resource-item {
+            background: var(--bg-card);
+            padding: 1.2rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .resource-item:hover {
+            transform: translateX(10px);
+            border-color: var(--primary);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .resource-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        .resource-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .resource-link:hover {
+            color: var(--accent);
+            gap: 0.8rem;
+        }
+
+        .resource-link::before {
+            content: '🔗';
+            font-size: 1rem;
+        }
+
+        .resource-description {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Checklist */
+        .checklist {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--success);
+        }
+
+        .checklist h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--success);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checklist h3::before {
+            content: '✅';
+            font-size: 1.3rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.7rem 0;
+            color: var(--text-secondary);
+        }
+
+        .checklist-item::before {
+            content: '✅';
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+
+        /* Footer */
+        footer {
+            position: relative;
+            z-index: 10;
+            background: var(--bg-card);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+
+        footer h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .footer-stats {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Progress indicator */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        /* Scroll to top button */
+        .scroll-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 30px rgba(99, 102, 241, 0.6);
+        }
+
+        .scroll-top.visible {
+            display: flex;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 2rem 1.5rem;
+            }
+
+            nav {
+                padding: 0.8rem 1rem;
+            }
+
+            .nav-steps {
+                gap: 0.3rem;
+            }
+
+            .nav-step {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .step-card {
+                padding: 1.5rem;
+            }
+
+            .step-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .step-number {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+        }
+
+        /* Link styling */
+        a {
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Animated background -->
+    <div class="bg-particles" id="particles"></div>
+
+    <!-- Header -->
+    <header>
+        <h1>🗺 ДОРОЖНАЯ КАРТА ИНВЕСТОРА</h1>
+        <p>7 шагов от нуля до стабильного портфеля | Только бесплатные ресурсы | Март 2026</p>
+        <div class="header-info">
+            <div><strong>⏱ Срок:</strong> 12–16 недель</div>
+            <div><strong>⏰ Нагрузка:</strong> 3–4 ч/неделю</div>
+            <div><strong>💰 Стоимость:</strong> 0 рублей</div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-steps">
+            <a href="#step-1" class="nav-step">Шаг 01</a>
+            <a href="#step-2" class="nav-step">Шаг 02</a>
+            <a href="#step-3" class="nav-step">Шаг 03</a>
+            <a href="#step-4" class="nav-step">Шаг 04</a>
+            <a href="#step-5" class="nav-step">Шаг 05</a>
+            <a href="#step-6" class="nav-step">Шаг 06</a>
+            <a href="#step-7" class="nav-step">Шаг 07</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Step 01 -->
+        <div class="step-card" id="step-1">
+            <div class="step-header">
+                <div class="step-number">01</div>
+                <div class="step-title-block">
+                    <h2>Финансовый фундамент</h2>
+                    <div class="step-duration">🕐 Срок: 1–2 недели</div>
+                </div>
+            </div>
+
+            <div class="step-content">
+                <div class="content-section">
+                    <h3>💡 Зачем</h3>
+                    <p>Без чёткой цели и финансовой подушки инвестиции — азартная игра.</p>
+                    <ul>
+                        <li>Ставим 3 финансовые цели с суммой и датой</li>
+                        <li>Создаём подушку безопасности (3–6 мес. расходов)</li>
+                        <li>Определяем, сколько можно инвестировать ежемесячно</li>
+                        <li>Закрываем потребительские кредиты до инвестиций</li>
+                    </ul>
+                </div>
+
+                <div class="resources">
+                    <h3>📚 Где изучаем</h3>
+                    
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 9: «Как инвестировать системно»</div>
+                        <a href="https://t-j.ru/pro/invest/9-system/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/9-system/</a>
+                        <div class="resource-description">📌 Сложный процент, личные финансы, план пополнения портфеля</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Статья: «Финансовая подушка безопасности»</div>
+                        <a href="https://t-j.ru/finansovaya-podushka/" class="resource-link" target="_blank" rel="noopener">t-j.ru/finansovaya-podushka/</a>
+                        <div class="resource-description">📌 Сколько нужно, где хранить, когда трогать</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 СберСова · Курс «Ведение бюджета»</div>
+                        <a href="https://sbersova.ru/academy/collections/kursy-po-budget" class="resource-link" target="_blank" rel="noopener">sbersova.ru/academy/collections/kursy-po-budget</a>
+                        <div class="resource-description">📌 Составление бюджета, цели, распределение расходов</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📺 Наталья Смирнова · плейлист «С чего начать»</div>
+                        <a href="https://youtube.com/@NataliyaSmirnova/playlists" class="resource-link" target="_blank" rel="noopener">youtube.com/@NataliyaSmirnova/playlists</a>
+                        <div class="resource-description">📌 Как рассчитать подушку и поставить инвест-цели</div>
+                    </div>
+                </div>
+
+                <div class="checklist">
+                    <h3>Результат (чек-лист)</h3>
+                    <div class="checklist-item">Прописаны 3 цели: сумма + дата</div>
+                    <div class="checklist-item">Финансовая подушка есть или есть план её создания</div>
+                    <div class="checklist-item">Определена сумма для ежемесячных инвестиций</div>
+                    <div class="checklist-item">Понимаю разницу: сбережение vs инвестирование</div>
+                    <div class="checklist-item">Потреб. кредиты закрыты или запланированы к закрытию</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 02 -->
+        <div class="step-card" id="step-2">
+            <div class="step-header">
+                <div class="step-number">02</div>
+                <div class="step-title-block">
+                    <h2>Теория: как работает рынок</h2>
+                    <div class="step-duration">🕐 Срок: 2–3 недели</div>
+                </div>
+            </div>
+
+            <div class="step-content">
+                <div class="content-section">
+                    <h3>💡 Зачем</h3>
+                    <p>Без понимания механики рынка решения принимаются на эмоциях.</p>
+                    <ul>
+                        <li>Понять, как устроена биржа и кто на ней участвует</li>
+                        <li>Узнать разницу: акция / облигация / ETF</li>
+                        <li>Понять, что такое доходность и риск</li>
+                        <li>Разобраться с понятием «брокер» и как он зарабатывает</li>
+                    </ul>
+                </div>
+
+                <div class="resources">
+                    <h3>📚 Где изучаем</h3>
+                    
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 МосБиржа · «Путь инвестора» — Модуль 1, Урок 1</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">«На старте: ставим инвест-цели»</div>
+                        <a href="https://school.moex.com/courses/put-investora" class="resource-link" target="_blank" rel="noopener">school.moex.com/courses/put-investora</a>
+                        <div class="resource-description">📌 Финансовые цели, инвест-стратегии, диверсификация</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 МосБиржа · «Путь инвестора» — Модуль 2</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">«Во что инвестировать»</div>
+                        <a href="https://school.moex.com/courses/put-investora" class="resource-link" target="_blank" rel="noopener">school.moex.com/courses/put-investora</a>
+                        <div class="resource-description">📌 Акции, облигации, фонды, валюта, металлы</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 1: «Во что и как можно вложиться»</div>
+                        <a href="https://t-j.ru/pro/invest/1-kupi-kozu/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/1-kupi-kozu/</a>
+                        <div class="resource-description">📌 Биржа, акции, облигации, биржевые фонды — базово</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 2: «Выбираем брокера»</div>
+                        <a href="https://t-j.ru/pro/invest/2-choose-your-fighter/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/2-choose-your-fighter/</a>
+                        <div class="resource-description">📌 Что делает брокер, как выбрать, как совершать сделки</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🎓 Khan Academy (рус.) · «Акции и облигации»</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">(39 уроков, 5–15 мин каждый)</div>
+                        <a href="https://ru.khanacademy.org/economics-finance-domain/core-finance/stock-and-bonds" class="resource-link" target="_blank" rel="noopener">ru.khanacademy.org/economics-finance-domain/core-finance/stock-and-bonds</a>
+                        <div class="resource-description">📌 Как работает рынок, оценка компаний, фондовые деривативы</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 СберСова · «Как стать инвестором» (11 уроков)</div>
+                        <a href="https://sbersova.ru/academy/courses/kak_stat_investorom" class="resource-link" target="_blank" rel="noopener">sbersova.ru/academy/courses/kak_stat_investorom</a>
+                        <div class="resource-description">📌 Акции, ОФЗ, инструмент�� рынка, риски, стратегии</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📺 InvestFuture · «Инвестиции с нуля» — плейлист</div>
+                        <a href="https://youtube.com/@InvestFuture/playlists" class="resource-link" target="_blank" rel="noopener">youtube.com/@InvestFuture/playlists</a>
+                        <div class="resource-description">📌 Базовые понятия, новости рынка, разборы для новичков</div>
+                    </div>
+                </div>
+
+                <div class="checklist">
+                    <h3>Результат (чек-лист)</h3>
+                    <div class="checklist-item">Понимаю, как устроена биржа и кто на ней торгует</div>
+                    <div class="checklist-item">Знаю разницу: акция / облигация / ETF / ПИФ</div>
+                    <div class="checklist-item">Понимаю: доходность, риск, ликвидность</div>
+                    <div class="checklist-item">Знаю, что такое брокер и его комиссия</div>
+                    <div class="checklist-item">Понимаю, что такое индекс IMOEX, S&P 500</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 03 -->
+        <div class="step-card" id="step-3">
+            <div class="step-header">
+                <div class="step-number">03</div>
+                <div class="step-title-block">
+                    <h2>Инструменты: акции, облигации, фонды</h2>
+                    <div class="step-duration">🕐 Срок: 2–3 недели</div>
+                </div>
+            </div>
+
+            <div class="step-content">
+                <div class="content-section">
+                    <h3>💡 Зачем</h3>
+                    <p>Каждый инструмент решает свою задачу: облигации — сохранить, акции — приумножить, ETF — диверсифицировать без усилий.</p>
+                    <ul>
+                        <li>Глубоко понять каждый инструмент</li>
+                        <li>Уметь считать доходность облигации</li>
+                        <li>Понять механизм дивидендов и отсечек</li>
+                        <li>Разобраться: ПИФ vs БПИФ vs ETF vs ОФЗ</li>
+                    </ul>
+                </div>
+
+                <div class="resources">
+                    <h3>📚 Где изучаем</h3>
+                    
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 4: «Облигации: как дать в долг и заработать»</div>
+                        <a href="https://t-j.ru/pro/invest/4-minfin-na/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/4-minfin-na/</a>
+                        <div class="resource-description">📌 Устройство облигаций, виды, как выбрать подходящие</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 5: «Акции: становимся совладельцами»</div>
+                        <a href="https://t-j.ru/pro/invest/5-wall-street/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/5-wall-street/</a>
+                        <div class="resource-description">📌 Почему цена растёт и падает, ловушки новичков</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 6: «Фонды: вложиться в сотни компаний»</div>
+                        <a href="https://t-j.ru/pro/invest/6-wtf-etf/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/6-wtf-etf/</a>
+                        <div class="resource-description">📌 Как устроены фонды, принцип выбора бумаг, ETF</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 Нетология · День 1: «Дивидендные акции»</div>
+                        <a href="https://netology.ru/programs/investments" class="resource-link" target="_blank" rel="noopener">netology.ru/programs/investments</a>
+                        <div class="resource-description">📌 13-я зарплата через дивиденды, практика: покупаем акцию</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 Нетология · День 2: «Облигации и ПИФ/БПИФ»</div>
+                        <a href="https://netology.ru/programs/investments" class="resource-link" target="_blank" rel="noopener">netology.ru/programs/investments</a>
+                        <div class="resource-description">📌 Доход с облигаций, практика: покупаем облигацию и пай фонда</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🎓 Stepik · «ДИВИГРЭМ: инвестиции для начинающих» (22 ур.)</div>
+                        <a href="https://stepik.org/course/176252/promo" class="resource-link" target="_blank" rel="noopener">stepik.org/course/176252/promo</a>
+                        <div class="resource-description">📌 Акции, облигации, фонды, выбор брокера — 74 теста</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 МосБиржа · «ИИС: от открытия до прибыли»</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">Урок 7: «ИИС и обычный брокерский счёт: в чём разница»</div>
+                        <a href="https://school.moex.com/courses/iis-ot-otkrytiya-do-pribyli" class="resource-link" target="_blank" rel="noopener">school.moex.com/courses/iis-ot-otkrytiya-do-pribyli</a>
+                        <div class="resource-description">📌 Типы ИИС, налоговые льготы, алгоритм открытия</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 МосБиржа · «ПИФы: типы, стратегии, комиссии»</div>
+                        <a href="https://school.moex.com/courses/price/free" class="resource-link" target="_blank" rel="noopener">school.moex.com/courses/price/free</a>
+                        <div class="resource-description">📌 Виды ПИФов, риски, налоговые льготы инвестора</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📺 РБК Инвестиции · «Гид по инвестициям» (пн, еженедельно)</div>
+                        <a href="https://youtube.com/@RBCInvestments" class="resource-link" target="_blank" rel="noopener">youtube.com/@RBCInvestments</a>
+                        <div class="resource-description">📌 Разборы инструментов, дивиденды, отчёты компаний</div>
+                    </div>
+                </div>
+
+                <div class="checklist">
+                    <h3>Результат (чек-лист)</h3>
+                    <div class="checklist-item">Умею считать доходность облигации к погашению</div>
+                    <div class="checklist-item">Понимаю, почему цена акции растёт и падает</div>
+                    <div class="checklist-item">Знаю разницу: ПИФ / БПИФ / ETF</div>
+                    <div class="checklist-item">Понимаю механизм дивидендов и дивидендные отсечки</div>
+                    <div class="checklist-item">Знаю, что такое ОФЗ и почему это «самое безопасное»</div>
+                    <div class="checklist-item">Могу объяснить, чем ИИС выгоднее обычного счёта</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 04 -->
+        <div class="step-card" id="step-4">
+            <div class="step-header">
+                <div class="step-number">04</div>
+                <div class="step-title-block">
+                    <h2>Практика: открытие счёта + первые сделки</h2>
+                    <div class="step-duration">🕐 Срок: 1 неделя</div>
+                </div>
+            </div>
+
+            <div class="step-content">
+                <div class="content-section">
+                    <h3>💡 Зачем</h3>
+                    <p>Теория без практики — ноль. Даже на 1 000 ₽ вы получите опыт, который не заменят 100 уроков.</p>
+                    <ul>
+                        <li>Выбрать брокера по критериям</li>
+                        <li>Открыть брокерский счёт + ИИС</li>
+                        <li>Совершить первую реальную сделку</li>
+                        <li>Понять, как списываются комиссии</li>
+                    </ul>
+                </div>
+
+                <div class="resources">
+                    <h3>📚 Где изучаем</h3>
+                    
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 2: «Выбираем брокера» — критерии выбора</div>
+                        <a href="https://t-j.ru/pro/invest/2-choose-your-fighter/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/2-choose-your-fighter/</a>
+                        <div class="resource-description">📌 Тарифы, надёжность, мобильное приложение</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 3: «Откройте ещё и ИИС»</div>
+                        <a href="https://t-j.ru/pro/invest/3-this-is-iis/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/3-this-is-iis/</a>
+                        <div class="resource-description">📌 Что такое ИИС, типы А и Б, как открыть</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 МосБиржа · «ИИС: от открытия до прибыли»</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">Урок 8: «Пошаговые инструкции»</div>
+                        <a href="https://school.moex.com/courses/iis-ot-otkrytiya-do-pribyli" class="resource-link" target="_blank" rel="noopener">school.moex.com/courses/iis-ot-otkrytiya-do-pribyli</a>
+                        <div class="resource-description">📌 Алгоритм открытия ИИС, правила пополнения, ошибки</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📊 Тинькофф · «Основы инвестирования» — урок: первая покупка</div>
+                        <a href="https://tbank.ru/invest/education/" class="resource-link" target="_blank" rel="noopener">tbank.ru/invest/education/</a>
+                        <div class="resource-description">📌 Открытие счёта, первая покупка ценной бумаги в приложении</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📊 БКС · Торговый симулятор — торговля без риска</div>
+                        <a href="https://bcs.ru/education" class="resource-link" target="_blank" rel="noopener">bcs.ru/education</a>
+                        <div class="resource-description">📌 Практика в торговом терминале без реальных денег</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📊 Газпромбанк · «Как начать инвестировать»</div>
+                        <a href="https://gazprombank.investments/education/" class="resource-link" target="_blank" rel="noopener">gazprombank.investments/education/</a>
+                        <div class="resource-description">📌 Открытие счёта, первые шаги, онлайн-встречи с экспертами</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">💬 Smart-Lab · ветка «Брокеры» — реальные отзывы</div>
+                        <a href="https://smart-lab.ru/brokers/" class="resource-link" target="_blank" rel="noopener">smart-lab.ru/brokers/</a>
+                        <div class="resource-description">📌 Честные отзывы о тарифах, поддержке, выводе средств</div>
+                    </div>
+                </div>
+
+                <div class="checklist">
+                    <h3>Результат (чек-лист)</h3>
+                    <div class="checklist-item">Открыт брокерский счёт</div>
+                    <div class="checklist-item">Открыт ИИС (осознанный выбор типа А или Б/3)</div>
+                    <div class="checklist-item">Совершена первая покупка: ОФЗ или БПИФ на индекс</div>
+                    <div class="checklist-item">Умею пользоваться торговым приложением брокера</div>
+                    <div class="checklist-item">Знаю, как выглядит биржевой стакан и заявка</div>
+                    <div class="checklist-item">Понимаю, как списываются комиссии</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 05 -->
+        <div class="step-card" id="step-5">
+            <div class="step-header">
+                <div class="step-number">05</div>
+                <div class="step-title-block">
+                    <h2>Портфель: стратегия и диверсификация</h2>
+                    <div class="step-duration">🕐 Срок: 2–3 недели</div>
+                </div>
+            </div>
+
+            <div class="step-content">
+                <div class="content-section">
+                    <h3>💡 Зачем</h3>
+                    <p>Отдельные акции — не стратегия. Портфель — это система, где активы балансируют риск и доходность.</p>
+                    <ul>
+                        <li>Определить свой риск-профиль</li>
+                        <li>Собрать первый реальный портфель</li>
+                        <li>Понять принципы диверсификации</li>
+                        <li>Разобраться с ребалансировкой</li>
+                    </ul>
+                </div>
+
+                <div class="resources">
+                    <h3>📚 Где изучаем</h3>
+                    
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 7: «Как собрать портфель»</div>
+                        <a href="https://t-j.ru/pro/invest/7-bad-balance/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/7-bad-balance/</a>
+                        <div class="resource-description">📌 Хороший vs плохой портфель, диверсификация, реальные примеры</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 9: «Как инвестировать системно»</div>
+                        <a href="https://t-j.ru/pro/invest/9-system/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/9-system/</a>
+                        <div class="resource-description">📌 Сложный процент, зачем реинвестировать доход</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 МосБиржа · «Путь инвестора» — Модуль 3</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">«Сделки, анализ, психология»</div>
+                        <a href="https://school.moex.com/courses/put-investora" class="resource-link" target="_blank" rel="noopener">school.moex.com/courses/put-investora</a>
+                        <div class="resource-description">📌 Сделки, анализ отчётности, ошибки мышления инвестора</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 МосБиржа · «Основы инвестиций» — вебинар</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">«Собери портфель на 1 000 ₽»</div>
+                        <a href="https://school.moex.com/courses/osnovy-investicij" class="resource-link" target="_blank" rel="noopener">school.moex.com/courses/osnovy-investicij</a>
+                        <div class="resource-description">📌 Практический разбор: портфель из реальных инструментов</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📊 Открытие · «Консервативный инвестор»</div>
+                        <a href="https://open-broker.ru/education/" class="resource-link" target="_blank" rel="noopener">open-broker.ru/education/</a>
+                        <div class="resource-description">📌 Облигации, ОФЗ, стратегия для низкого риска</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📊 Открытие · «Умеренный / агрессивный инвестор»</div>
+                        <a href="https://open-broker.ru/education/" class="resource-link" target="_blank" rel="noopener">open-broker.ru/education/</a>
+                        <div class="resource-description">📌 Акции, зарубежные рынки, высокорисковые портфели</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📺 Назар Щетинин · «Живой портфель» — разборы</div>
+                        <a href="https://youtube.com/@NazarShchetinin" class="resource-link" target="_blank" rel="noopener">youtube.com/@NazarShchetinin</a>
+                        <div class="resource-description">📌 Реальный портфель на фундаментальном анализе, какие акции брать</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">💬 Smart-Lab · раздел «Портфели»</div>
+                        <a href="https://smart-lab.ru/my-trade-portfolio/" class="resource-link" target="_blank" rel="noopener">smart-lab.ru/my-trade-portfolio/</a>
+                        <div class="resource-description">📌 Реальные портфели практиков: структура, идеи, обсуждения</div>
+                    </div>
+                </div>
+
+                <div class="checklist">
+                    <h3>Результат (чек-лист)</h3>
+                    <div class="checklist-item">Знаю свой риск-профиль (консерв./умеренный/агресс.)</div>
+                    <div class="checklist-item">Собран портфель: акции + облигации + ETF</div>
+                    <div class="checklist-item">Понимаю диверсификацию по секторам и странам</div>
+                    <div class="checklist-item">Знаю, когда и как делать ребалансировку</div>
+                    <div class="checklist-item">Понимаю, как горизонт (3/5/10 лет) меняет портфель</div>
+                    <div class="checklist-item">Могу объяснить, почему мой портфель выглядит именно так</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 06 -->
+        <div class="step-card" id="step-6">
+            <div class="step-header">
+                <div class="step-number">06</div>
+                <div class="step-title-block">
+                    <h2>Анализ: как выбирать акции и облигации</h2>
+                    <div class="step-duration">🕐 Срок: 3–4 недели</div>
+                </div>
+            </div>
+
+            <div class="step-content">
+                <div class="content-section">
+                    <h3>💡 Зачем</h3>
+                    <p>Покупать «по совету из Telegram» — самая частая ошибка. Анализ = умение самостоятельно оценить компанию.</p>
+                    <ul>
+                        <li>Читать финансовую отчётность (МСФО)</li>
+                        <li>Считать мультипликаторы P/E, P/B, EV/EBITDA</li>
+                        <li>Рассчитать доходность облигации к погашению</li>
+                        <li>Базовый технический анализ: уровни, свечи</li>
+                        <li>Пользоваться TradingView и Investing.com</li>
+                    </ul>
+                </div>
+
+                <div class="resources">
+                    <h3>📚 Где изучаем</h3>
+                    
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 SF Education · Модуль 3: «Рынок акций»</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">Анализ отчётности, DCF, мультипликаторы (бесплатный доступ 48 ч)</div>
+                        <a href="https://sf.education/analysisofmarkets" class="resource-link" target="_blank" rel="noopener">sf.education/analysisofmarkets</a>
+                        <div class="resource-description">📌 Читаем МСФО, оцениваем акции методом DCF и мультипликаторов</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 SF Education · Модуль 5: «Облигации»</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">Виды, доходность, кредитные риски, дюрация</div>
+                        <a href="https://sf.education/analysisofmarkets" class="resource-link" target="_blank" rel="noopener">sf.education/analysisofmarkets</a>
+                        <div class="resource-description">📌 Считаем доходность к погашению, оцениваем кредитный риск</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 SF Education · Модуль 8: «Технический анализ»</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">Графики, свечи, индикаторы RSI/MACD</div>
+                        <a href="https://sf.education/analysisofmarkets" class="resource-link" target="_blank" rel="noopener">sf.education/analysisofmarkets</a>
+                        <div class="resource-description">📌 Точки входа/выхода, TradingView на практике</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 МосБиржа · «Путь инвестора» — Модуль 3</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">«Читаем отчётность финансового посредника»</div>
+                        <a href="https://school.moex.com/courses/put-investora" class="resource-link" target="_blank" rel="noopener">school.moex.com/courses/put-investora</a>
+                        <div class="resource-description">📌 Базовый разбор отчётности эмитента</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 МосБиржа · Курс «Технический анализ»</div>
+                        <a href="https://school.moex.com/courses" class="resource-link" target="_blank" rel="noopener">school.moex.com/courses</a>
+                        <div class="resource-description">📌 Свечной анализ, уровни поддержки/сопротивления, индикаторы</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📊 БКС · «Технический анализ» — раздел в школе</div>
+                        <a href="https://bcs.ru/education" class="resource-link" target="_blank" rel="noopener">bcs.ru/education</a>
+                        <div class="resource-description">📌 QUIK, паттерны, MACD, RSI, сигналы на вход</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📺 Назар Щетинин · «Прожарка компаний»</div>
+                        <a href="https://youtube.com/@NazarShchetinin" class="resource-link" target="_blank" rel="noopener">youtube.com/@NazarShchetinin</a>
+                        <div class="resource-description">📌 Разбор МСФО на реальных компаниях: как читать отчёт</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">💬 Smart-Lab · статья «15 курсов по финансам»</div>
+                        <a href="https://smart-lab.ru/blog/493605.php" class="resource-link" target="_blank" rel="noopener">smart-lab.ru/blog/493605.php</a>
+                        <div class="resource-description">📌 Подборка бесплатных ресурсов по анализу от практиков</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🔧 TradingView — бесплатные инструменты</div>
+                        <a href="https://tradingview.com" class="resource-link" target="_blank" rel="noopener">tradingview.com</a>
+                        <div class="resource-description">📌 Графики, технические индикаторы, скринер акций</div>
+                    </div>
+                </div>
+
+                <div class="checklist">
+                    <h3>Результат (чек-лист)</h3>
+                    <div class="checklist-item">Умею читать отчёт МСФО: выручка, EBITDA, долг</div>
+                    <div class="checklist-item">Рассчитываю P/E, P/B, Div Yield, EV/EBITDA</div>
+                    <div class="checklist-item">Умею посчитать доходность облигации к погашению</div>
+                    <div class="checklist-item">Понимаю базовый техан: уровни, тренды, свечи</div>
+                    <div class="checklist-item">Работаю в TradingView для анализа графиков</div>
+                    <div class="checklist-item">Могу выбрать 3–5 акций с обоснованием</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 07 -->
+        <div class="step-card" id="step-7">
+            <div class="step-header">
+                <div class="step-number">07</div>
+                <div class="step-title-block">
+                    <h2>Налоги, ИИС и защита капитала</h2>
+                    <div class="step-duration">🕐 Срок: 1–2 недели</div>
+                </div>
+            </div>
+
+            <div class="step-content">
+                <div class="content-section">
+                    <h3>💡 Зачем</h3>
+                    <p>Незнание налогов = потеря 13–15% дохода. ИИС даёт до 52 000 ₽ в год от государства просто за то, что вы инвестируете.</p>
+                    <ul>
+                        <li>Понять, как брокер удерживает НДФЛ</li>
+                        <li>Знать ИИС тип А, Б и ИИС-3</li>
+                        <li>Знать льготу ЛДВ (акции >3 лет = 0 налога)</li>
+                        <li>Уметь подать 3-НДФЛ</li>
+                        <li>Защититься от мошенников на рынке</li>
+                    </ul>
+                </div>
+
+                <div class="resources">
+                    <h3>📚 Где изучаем</h3>
+                    
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 8: «Налоги инвестора: как платить меньше»</div>
+                        <a href="https://t-j.ru/pro/invest/8-prime-time/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/8-prime-time/</a>
+                        <div class="resource-description">📌 НДФЛ с купонов, дивидендов, продаж. Ставки 13%/15%. ЛДВ</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Урок 3: «Откройте ещё и ИИС»</div>
+                        <a href="https://t-j.ru/pro/invest/3-this-is-iis/" class="resource-link" target="_blank" rel="noopener">t-j.ru/pro/invest/3-this-is-iis/</a>
+                        <div class="resource-description">📌 Типы ИИС, как зарабатывать, зачем открыть оба счёта</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · Статья: «Как платить налоги с инвестиций»</div>
+                        <a href="https://t-j.ru/invest-declare/" class="resource-link" target="_blank" rel="noopener">t-j.ru/invest-declare/</a>
+                        <div class="resource-description">📌 Пошаговая инструкция по 3-НДФЛ через Госуслуги</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 МосБиржа · «ИИС: от открытия до прибыли»</div>
+                        <div class="resource-description" style="margin-bottom: 0.5rem;">Урок 8: «Пошаговые инструкции»</div>
+                        <a href="https://school.moex.com/courses/iis-ot-otkrytiya-do-pribyli" class="resource-link" target="_blank" rel="noopener">school.moex.com/courses/iis-ot-otkrytiya-do-pribyli</a>
+                        <div class="resource-description">📌 Алгоритм открытия, типичные ошибки, как не лишиться льготы</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">🏫 МосБиржа · «Все про ИИС» — вебинар</div>
+                        <a href="https://school.moex.com/courses/11986" class="resource-link" target="_blank" rel="noopener">school.moex.com/courses/11986</a>
+                        <div class="resource-description">📌 Максимум выгоды из каждого типа ИИС, наследование, развод</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📺 Наталья Смирнова · плейлист «Налоги инвестора»</div>
+                        <a href="https://youtube.com/@NataliyaSmirnova/playlists" class="resource-link" target="_blank" rel="noopener">youtube.com/@NataliyaSmirnova/playlists</a>
+                        <div class="resource-description">📌 Лайфхаки по вычетам, декларация, как законно не платить</div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-title">📖 Т—Ж · раздел «Налоги» — статьи</div>
+                        <a href="https://t-j.ru/tag/nalogi/" class="resource-link" target="_blank" rel="noopener">t-j.ru/tag/nalogi/</a>
+                        <div class="resource-description">📌 Практические кейсы: как вернуть деньги, когда брокер ошибся</div>
+                    </div>
+                </div>
+
+                <div class="checklist">
+                    <h3>Результат (чек-лист)</h3>
+                    <div class="checklist-item">Знаю, как брокер удерживает НДФЛ автоматически</div>
+                    <div class="checklist-item">Понимаю разницу ИИС-А (вычет на взнос) и ИИС-Б/3</div>
+                    <div class="checklist-item">Знаю ЛДВ: акции >3 лет = нет налога на прибыль</div>
+                    <div class="checklist-item">Умею подать 3-НДФЛ для вычета по ИИС</div>
+                    <div class="checklist-item">Знаю признаки мошеннических схем</div>
+                    <div class="checklist-item">Есть системный план: пополняю портфель каждый месяц</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <h3>📌 Как пользоваться дорожной картой</h3>
+        <p>
+            <strong>«ЗАЧЕМ»</strong> — понять смысл этапа · 
+            <strong>«ГДЕ ИЗУЧАЕМ»</strong> — название ресурса + прямая ссылка на урок + что конкретно изучаете · 
+            <strong>«РЕЗУЛЬТАТ»</strong> — чек-лист для самопроверки
+        </p>
+        
+        <div class="footer-stats">
+            <div class="stat">
+                <div class="stat-number">7</div>
+                <div class="stat-label">Шагов</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">12–16</div>
+                <div class="stat-label">Недель</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">0₽</div>
+                <div class="stat-label">Стоимость</div>
+            </div>
+        </div>
+
+        <p style="margin-top: 2rem; font-size: 0.9rem; opacity: 0.7;">
+            Дорожная карта инвестора · Март 2026 · Все ресурсы бесплатные
+        </p>
+    </footer>
+
+    <!-- Scroll to top button -->
+    <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        ↑
+    </button>
+
+    <script>
+        // Progress bar
+        function updateProgressBar() {
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            const scrollTop = window.scrollY;
+            const progress = (scrollTop / (documentHeight - windowHeight)) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Scroll to top button
+        function updateScrollTopButton() {
+            const scrollTop = document.getElementById('scrollTop');
+            if (window.scrollY > 300) {
+                scrollTop.classList.add('visible');
+            } else {
+                scrollTop.classList.remove('visible');
+            }
+        }
+
+        // Create animated particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 15;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 100 + 50 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Event listeners
+        window.addEventListener('scroll', () => {
+            updateProgressBar();
+            updateScrollTopButton();
+        });
+
+        // Initialize
+        createParticles();
+        updateProgressBar();
+        updateScrollTopButton();
+    </script>
+</body>
+</html>
