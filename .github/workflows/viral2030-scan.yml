@@ -1,0 +1,17 @@
+name: Проверка новостей для бота 2030
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wake-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Разбудить сервис Render
+        run: |
+          curl --fail --silent --show-error --location --max-time 240 --retry 2 --retry-delay 8 "https://viral2030-reels-bot.onrender.com/"
