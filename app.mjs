@@ -30,9 +30,16 @@ function score(x){
  const hooks=['впервые','запрет','рекорд','угрожа','замен','обогат','массов','скандал','почему','неожидан','миллион','будущ','вместо','подорож','налог','прорыв','увольнен','взрыв','опасн'];
  const broadPoints=broad.reduce((n,k)=>n+(t.includes(k)?9:0),0);
  const hookPoints=hooks.reduce((n,k)=>n+(t.includes(k)?8:0),0);
- const nichePenalty=niche.some(k=>t.includes(k))?28:0;
+ const people=['илон маск','маск','elon musk','musk','трамп','trump','дженсен хуанг','jensen huang','безос','bezos','цукерберг','zuckerberg','гейтс','gates','альтман','altman','баффет','buffett','дуров','durov'];
+ const forward=['будущ','измен','прорыв','созда','запуст','планир','постро','изобрел','изобрет','успех','достиж','новый','впервые','професси','технолог','космос','робот','мотивац','предприним','future','build','launch','innovation','breakthrough','robot','space','startup'];
+ const political=['выбор','голосован','конгресс','партия','парламент','дипломат','санкц','военный','война','министр','election','campaign','senate','congress','war','military','sanctions'];
+ const future=forward.some(k=>t.includes(k));
+ const politic=political.some(k=>t.includes(k));
+ const personalBonus=people.some(k=>t.includes(k))?(future?24:6):0;
+ const motivationBonus=forward.reduce((n,k)=>n+(t.includes(k)?5:0),0);
+ const nichePenalty=(niche.some(k=>t.includes(k))?28:0)+(politic&&!future?55:politic?16:0);
  const engagement=x.comments===null?0:Math.min(28,Math.log1p(x.comments)*5)+Math.min(12,Math.log1p(x.points||0)*2);
- return Math.max(0,Math.min(100,Math.round(12+Math.min(43,broadPoints)+Math.min(25,hookPoints)+engagement-nichePenalty)));
+ return Math.max(0,Math.min(100,Math.round(12+Math.min(43,broadPoints)+Math.min(25,hookPoints)+Math.min(18,motivationBonus)+personalBonus+engagement-nichePenalty)));
 }
 async function sources(){
  const items=[];
@@ -49,7 +56,16 @@ async function sources(){
  'искусственный интеллект заменяет профессии',
  'технологии изменения жизни людей',
  'богатство бизнес новые возможности заработка',
- 'демография образование здоровье будущее'
+ 'демография образование здоровье будущее',
+ 'Илон Маск SpaceX Tesla Neuralink будущее',
+ 'Elon Musk new technology future innovation',
+ 'Jensen Huang Nvidia artificial intelligence future',
+ 'Sam Altman OpenAI future of work',
+ 'Jeff Bezos Mark Zuckerberg business breakthrough',
+ 'Дуров бизнес технологии будущее',
+ 'Трамп технологии искусственный интеллект космос экономика',
+ 'вдохновляющая история успеха предприниматель достижения',
+ 'прорыв изобретение технология будущее человечества'
  ];
  for(const q of queries){
   try {
@@ -80,7 +96,7 @@ async function scan(){
 async function scenario(x){
  if(!aiKey) return 'Не задан OPENAI_API_KEY в Render → Environment.';
  const messages=[
- {role:'system',content:'Вы — редактор ВИРУСНЫХ коротких роликов для самой широкой аудитории (не только инвесторов и айтишников) личного канала «Подготовка к 2030 году и добыча нефти XXI века». Напишите ОДИН разговорный сценарий Reels на русском языке строго на 20–30 секунд, 50–70 слов. Один тейк, без ремарок, заголовков, пунктов, эмодзи, указаний монтажа. Структура: 1) сильный честный триггерный хук; 2) раскрытие конкретной новости и польза; 3) очень короткая и естественная связь с подготовкой к 2030 году или поиском нефти XXI века (новые возможности), но без натянутой аналогии; 4) призыв подписаться. Избегайте узкого профессионального жаргона, делайте сюжет понятным любому человеку. Не выдумывайте цифры и цитаты и не делайте категорических выводов из одного заголовка. Если деталей недостаточно, говорите осторожно.'},
+ {role:'system',content:'Вы — редактор ВИРУСНЫХ коротких роликов для самой широкой аудитории (не только инвесторов и айтишников) личного канала «Подготовка к 2030 году и добыча нефти XXI века». Напишите ОДИН разговорный сценарий Reels на русском языке строго на 20–30 секунд, 50–70 слов. Один тейк, без ремарок, заголовков, пунктов, эмодзи, указаний монтажа. Структура: 1) сильный честный триггерный хук; 2) раскрытие конкретной новости и польза; 3) очень короткая и естественная связь с подготовкой к 2030 году или поиском нефти XXI века (новые возможности), но без натянутой аналогии; 4) призыв подписаться. Сюжет и тон — вдохновляющие перемены, развитие, движение вперёд, достижения, новые возможности, известные личности. Политику не обсуждать, кроме прямого влияния события на будущее или технологии. Избегайте узкого профессионального жаргона, делайте сюжет понятным любому человеку. Не выдумывайте цифры и цитаты и не делайте категорических выводов из одного заголовка. Если деталей недостаточно, говорите осторожно.'},
  {role:'user',content:'Источник: '+x.source+'\nНовость: '+x.title+'\nСсылка: '+x.url+'\nКомментарии: '+(x.comments??'нет данных')+'\nНапишите сценарий.'}
  ];
  const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{authorization:'Bearer '+aiKey,'content-type':'application/json'},body:JSON.stringify({model:env.OPENAI_MODEL||'gpt-4.1-mini',messages,temperature:0.8,max_tokens:240})});
