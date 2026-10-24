@@ -25,22 +25,37 @@ function strip(x){return String(x||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'
 function esc(x){return String(x||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 function score(x){
  const t=(x.title||'').toLowerCase();
- const keywords=['ии','искусственн','2027','2030','работ','зарплат','миллиард','робот','банк','кризис','будущ','деньг','технолог','ai ','artificial intelligence','jobs','robot','future','billion','economy','automation'];
- return Math.min(100,Math.round(20+(x.comments||0)*0.65+(x.points||0)*0.14+keywords.reduce((n,k)=>n+(t.includes(k)?11:0),0)));
+ const broad=['зарплат','пенси','цены','подорож','подешев','миллион','миллиард','работ','увольнен','доход','квартир','налог','запрет','закон','образован','школ','медици','здоров','робот','искусствен','професси','путешеств','богат','бедн','неожидан','скандал','рекорд','технолог','семь','дет','общество','интернет','jobs','money','future','wealth','housing','robot','ai ','ban ','education'];
+ const niche=['github','programming','javascript','software release','api update','kernel','compiler','database'];
+ const hooks=['впервые','запрет','рекорд','угрожа','замен','обогат','массов','скандал','почему','неожидан','миллион','будущ','вместо','подорож','налог','прорыв','увольнен','взрыв','опасн'];
+ const broadPoints=broad.reduce((n,k)=>n+(t.includes(k)?9:0),0);
+ const hookPoints=hooks.reduce((n,k)=>n+(t.includes(k)?8:0),0);
+ const nichePenalty=niche.some(k=>t.includes(k))?28:0;
+ const engagement=x.comments===null?0:Math.min(28,Math.log1p(x.comments)*5)+Math.min(12,Math.log1p(x.points||0)*2);
+ return Math.max(0,Math.min(100,Math.round(12+Math.min(43,broadPoints)+Math.min(25,hookPoints)+engagement-nichePenalty)));
 }
 async function sources(){
  const items=[];
  const ids=await (await fetch('https://hacker-news.firebaseio.com/v0/topstories.json')).json();
- const samples=await Promise.all(ids.slice(0,40).map(async id=>{
+ const samples=await Promise.all(ids.slice(0,25).map(async id=>{
   try {const r=await fetch('https://hacker-news.firebaseio.com/v0/item/'+id+'.json');return r.json();}catch{return null;}
  }));
  for(const i of samples) if(i&&i.title&&i.url) items.push({id:'hn'+i.id,title:i.title,url:i.url,comments:i.descendants||0,points:i.score||0,source:'Hacker News'});
- const queries=['искусственный интеллект будущее 2030','технологии работа экономика 2030'];
+ const queries=[
+ 'самые обсуждаемые новости сегодня общество деньги работа',
+ 'новости цены зарплаты пенсии налоги',
+ 'новости запреты законы изменения жизнь людей',
+ 'новости неожиданные события рекорды скандалы',
+ 'искусственный интеллект заменяет профессии',
+ 'технологии изменения жизни людей',
+ 'богатство бизнес новые возможности заработка',
+ 'демография образование здоровье будущее'
+ ];
  for(const q of queries){
   try {
    const r=await fetch('https://news.google.com/rss/search?q='+encodeURIComponent(q)+'&hl=ru&gl=RU&ceid=RU:ru');
    const xml=await r.text();
-   for(const block of xml.match(/<item>[\s\S]*?<\/item>/g)||[]){
+   for(const block of (xml.match(/<item>[\s\S]*?<\/item>/g)||[]).slice(0,12)){
     const title=strip((block.match(/<title>([\s\S]*?)<\/title>/)||[])[1]).replace(/<!\[CDATA\[|\]\]>/g,'');
     const link=strip((block.match(/<link>([\s\S]*?)<\/link>/)||[])[1]);
     if(title&&link)items.push({id:crypto.createHash('sha256').update(link).digest('hex').slice(0,20),title,url:link,source:'Google News',comments:null,points:null});
@@ -53,11 +68,11 @@ async function scan(){
  if(scanBusy||!token||!owner)return;
  scanBusy=true;
  try{
-  const candidates=(await sources()).filter(x=>!sent.has(x.id)).map(x=>({...x,rank:score(x)})).sort((a,b)=>b.rank-a.rank).slice(0,limit);
+  const candidates=(await sources()).filter(x=>!sent.has(x.id)).map(x=>({...x,rank:score(x)})).filter(x=>x.rank>=29).sort((a,b)=>b.rank-a.rank).slice(0,limit);
   for(const x of candidates){
    sent.add(x.id);news.set(x.id,x);
    const metrics=x.comments!==null?'Комментарии: '+x.comments+'; реакции HN: '+x.points:'Публичных показателей комментариев у RSS нет';
-   await telegram('sendMessage',{chat_id:owner,parse_mode:'HTML',disable_web_page_preview:true,text:'🔥 <b>'+esc(x.title)+'</b>\n\nИсточник: '+esc(x.source)+'\n'+esc(metrics)+'\nОценка потенциала (эвристика): '+x.rank+'/100\n'+esc(x.url),reply_markup:{inline_keyboard:[[{text:'🎬 Сделать Reels',callback_data:'reel:'+x.id},{text:'Пропустить',callback_data:'skip:'+x.id}]]}});
+   await telegram('sendMessage',{chat_id:owner,parse_mode:'HTML',disable_web_page_preview:true,text:'🔥 <b>'+esc(x.title)+'</b>\n\nИсточник: '+esc(x.source)+'\n'+esc(metrics)+'\nОценка массового интереса (прогноз, не факт вирусности): '+x.rank+'/100\n'+esc(x.url),reply_markup:{inline_keyboard:[[{text:'🎬 Сделать Reels',callback_data:'reel:'+x.id},{text:'Пропустить',callback_data:'skip:'+x.id}]]}});
   }
   if(sent.size>1500){sent.clear();news.clear();}
  }catch(e){console.error('SCAN',e);}finally{scanBusy=false;}
@@ -65,7 +80,7 @@ async function scan(){
 async function scenario(x){
  if(!aiKey) return 'Не задан OPENAI_API_KEY в Render → Environment.';
  const messages=[
- {role:'system',content:'Вы — редактор личного канала «Подготовка к 2030 году и добыча нефти XXI века». Напишите ОДИН разговорный сценарий Reels на русском языке строго на 20–30 секунд, 50–70 слов. Один тейк, без ремарок, заголовков, пунктов, эмодзи, указаний монтажа. Структура: 1) сильный честный триггерный хук; 2) раскрытие конкретной новости и польза; 3) естественная связь с подготовкой к 2030 году или поиском нефти XXI века (новые возможности); 4) призыв подписаться. Не выдумывайте цифры и цитаты и не делайте категорических выводов из одного заголовка. Если деталей недостаточно, говорите осторожно.'},
+ {role:'system',content:'Вы — редактор ВИРУСНЫХ коротких роликов для самой широкой аудитории (не только инвесторов и айтишников) личного канала «Подготовка к 2030 году и добыча нефти XXI века». Напишите ОДИН разговорный сценарий Reels на русском языке строго на 20–30 секунд, 50–70 слов. Один тейк, без ремарок, заголовков, пунктов, эмодзи, указаний монтажа. Структура: 1) сильный честный триггерный хук; 2) раскрытие конкретной новости и польза; 3) очень короткая и естественная связь с подготовкой к 2030 году или поиском нефти XXI века (новые возможности), но без натянутой аналогии; 4) призыв подписаться. Избегайте узкого профессионального жаргона, делайте сюжет понятным любому человеку. Не выдумывайте цифры и цитаты и не делайте категорических выводов из одного заголовка. Если деталей недостаточно, говорите осторожно.'},
  {role:'user',content:'Источник: '+x.source+'\nНовость: '+x.title+'\nСсылка: '+x.url+'\nКомментарии: '+(x.comments??'нет данных')+'\nНапишите сценарий.'}
  ];
  const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{authorization:'Bearer '+aiKey,'content-type':'application/json'},body:JSON.stringify({model:env.OPENAI_MODEL||'gpt-4.1-mini',messages,temperature:0.8,max_tokens:240})});
