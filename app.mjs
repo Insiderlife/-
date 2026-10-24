@@ -107,7 +107,7 @@ async function scan(){
    x.titleRu=ruTitle;
    sent.add(x.id);news.set(x.id,x);
    const metrics=x.comments!==null?'Комментарии: '+x.comments+'; реакции HN: '+x.points:'Публичных показателей комментариев у RSS нет';
-   await telegram('sendMessage',{chat_id:owner,parse_mode:'HTML',disable_web_page_preview:true,text:'🔥 <b>'+esc(x.titleRu)+'</b>\n\nИсточник: '+esc(x.source)+'\n'+esc(metrics)+'\nОценка массового интереса (прогноз, не факт вирусности): '+x.rank+'/100\n'+esc(x.url),reply_markup:{inline_keyboard:[[{text:'🎬 Сделать Reels',callback_data:'reel:'+x.id},{text:'Пропустить',callback_data:'skip:'+x.id}]]}});
+   await telegram('sendMessage',{chat_id:owner,parse_mode:'HTML',disable_web_page_preview:true,text:'🔥 <b>'+esc(x.titleRu)+'</b>\n\nИсточник: '+esc(x.source)+'\n'+esc(metrics)+'\nОценка массового интереса (прогноз, не факт вирусности): '+x.rank+'/100\n'+esc(x.url),reply_markup:{inline_keyboard:[[{text:'🎬 Создать сценарий',callback_data:'reel:'+x.id},{text:'Пропустить',callback_data:'skip:'+x.id}]]}});
   }
   if(sent.size>1500){sent.clear();news.clear();}
  }catch(e){console.error('SCAN',e);}finally{scanBusy=false;}
@@ -141,7 +141,7 @@ async function incoming(update){
   if(action==='skip'){await telegram('sendMessage',{chat_id:chat,text:'Пропущено.'});return;}
   const x=news.get(id);
   if(!x){await telegram('sendMessage',{chat_id:chat,text:'Новость не сохранилась после перезапуска. Дождитесь новой подборки.'});return;}
-  try{const s=await scenario(x);await telegram('sendMessage',{chat_id:chat,text:'🎬 Сценарий Reels\n\n'+s+'\n\nИсточник: '+x.url,disable_web_page_preview:true});}
+  try{const s=await scenario(x);await telegram('sendMessage',{chat_id:chat,text:'🎬 Сценарий ролика\n\n'+s+'\n\nИсточник: '+x.url,disable_web_page_preview:true});}
   catch(e){await telegram('sendMessage',{chat_id:chat,text:'Ошибка генерации: '+e.message});}
  }
 }
