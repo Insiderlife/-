@@ -102,7 +102,12 @@ async function scan(){
  if(scanBusy||!token||!owner)return;
  scanBusy=true;
  try{
-  const candidates=(await sources()).filter(x=>!sent.has(x.id)&&!isPolitical(x)).map(x=>({...x,rank:score(x)})).filter(x=>x.rank>=29).sort((a,b)=>b.rank-a.rank).slice(0,limit);
+  const fetched=await sources();
+  const fresh=fetched.filter(x=>!sent.has(x.id));
+  const safe=fresh.filter(x=>!isPolitical(x));
+  const candidates=safe.map(x=>({...x,rank:score(x)})).sort((a,b)=>b.rank-a.rank).slice(0,limit);
+  console.log('SCAN STATS fetched='+fetched.length+' fresh='+fresh.length+' nonpolitical='+safe.length+' candidates='+candidates.length);
+  let delivered=0;
   for(const x of candidates){
    const ruTitle=await russianHeadline(x);
    if(!ruTitle||!/[А-Яа-яЁё]/.test(ruTitle)){console.log('Skipping untranslated headline',x.id);continue;}
@@ -110,7 +115,9 @@ async function scan(){
    sent.add(x.id);news.set(x.id,x);
    const metrics=x.views!==null?'Просмотры: '+x.views.toLocaleString('ru-RU'):'Данные о просмотрах недоступны';
    await telegram('sendMessage',{chat_id:owner,parse_mode:'HTML',disable_web_page_preview:true,text:'🔥 <b>'+esc(x.titleRu)+'</b>\n\nИсточник: '+esc(x.source)+'\n'+esc(metrics)+'\nОценка массового интереса (прогноз, не факт вирусности): '+x.rank+'/100\n'+esc(x.url),reply_markup:{inline_keyboard:[[{text:'🎬 Создать сценарий',callback_data:'reel:'+x.id},{text:'Пропустить',callback_data:'skip:'+x.id}]]}});
+   delivered++;
   }
+  console.log('SCAN SENT '+delivered);
   if(sent.size>1500){sent.clear();news.clear();}
  }catch(e){console.error('SCAN',e);}finally{scanBusy=false;}
 }
