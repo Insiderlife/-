@@ -39,46 +39,35 @@ function score(x){
  const motivationBonus=forward.reduce((n,k)=>n+(t.includes(k)?5:0),0);
  const nichePenalty=(niche.some(k=>t.includes(k))?28:0)+(politic&&!future?55:politic?16:0);
  const engagement=x.comments===null?0:Math.min(28,Math.log1p(x.comments)*5)+Math.min(12,Math.log1p(x.points||0)*2);
- return Math.max(0,Math.min(100,Math.round(12+Math.min(43,broadPoints)+Math.min(25,hookPoints)+Math.min(18,motivationBonus)+personalBonus+engagement-nichePenalty)));
+ return Math.max(0,Math.min(95,Math.round(12+Math.min(22,broadPoints)+Math.min(25,hookPoints)+Math.min(18,motivationBonus)+personalBonus+engagement-nichePenalty)));
 }
 async function sources(){
  const items=[];
- const ids=await (await fetch('https://hacker-news.firebaseio.com/v0/topstories.json')).json();
- const samples=await Promise.all(ids.slice(0,25).map(async id=>{
-  try {const r=await fetch('https://hacker-news.firebaseio.com/v0/item/'+id+'.json');return r.json();}catch{return null;}
- }));
- for(const i of samples) if(i&&i.title&&i.url) items.push({id:'hn'+i.id,title:i.title,url:i.url,comments:i.descendants||0,points:i.score||0,source:'Hacker News'});
  const queries=[
- 'самые обсуждаемые новости сегодня общество деньги работа',
- 'новости цены зарплаты пенсии налоги',
- 'новости запреты законы изменения жизнь людей',
- 'новости неожиданные события рекорды скандалы',
- 'искусственный интеллект заменяет профессии',
- 'технологии изменения жизни людей',
- 'богатство бизнес новые возможности заработка',
- 'демография образование здоровье будущее',
- 'Илон Маск SpaceX Tesla Neuralink будущее',
- 'Elon Musk new technology future innovation',
- 'Jensen Huang Nvidia artificial intelligence future',
- 'Sam Altman OpenAI future of work',
- 'Jeff Bezos Mark Zuckerberg business breakthrough',
- 'Дуров бизнес технологии будущее',
- 'Трамп технологии искусственный интеллект космос экономика',
- 'вдохновляющая история успеха предприниматель достижения',
- 'прорыв изобретение технология будущее человечества'
+ 'site:rbc.ru технологии будущее Маск',
+ 'site:tass.ru технологии робот будущего',
+ 'site:ria.ru открытия технологии будущее',
+ 'site:forbes.ru предприниматели успех технологии',
+ 'site:vc.ru новые технологии предприниматель',
+ 'site:pikabu.ru необычные открытия технологии',
+ 'site:ixbt.com робот Маск технологии',
+ 'site:hi-tech.mail.ru технологии открытие',
+ 'site:lenta.ru технологии общество будущее',
+ 'site:rg.ru профессии будущее технологии'
  ];
- for(const q of queries){
-  try {
-   const r=await fetch('https://news.google.com/rss/search?q='+encodeURIComponent(q)+'&hl=ru&gl=RU&ceid=RU:ru');
-   const xml=await r.text();
-   for(const block of (xml.match(/<item>[\s\S]*?<\/item>/g)||[]).slice(0,12)){
-    const title=strip((block.match(/<title>([\s\S]*?)<\/title>/)||[])[1]).replace(/<!\[CDATA\[|\]\]>/g,'');
-    const link=strip((block.match(/<link>([\s\S]*?)<\/link>/)||[])[1]);
-    if(title&&link)items.push({id:crypto.createHash('sha256').update(link).digest('hex').slice(0,20),title,url:link,source:'Google News',comments:null,points:null});
-   }
-  }catch(e){console.error('RSS:',e.message);}
- }
- return items;
+ const feeds=await Promise.allSettled(queries.map(async q=>{
+  const response=await fetch('https://news.google.com/rss/search?q='+encodeURIComponent(q+' when:3d')+'&hl=ru&gl=RU&ceid=RU:ru',{signal:AbortSignal.timeout(12000)});
+  if(!response.ok)return [];
+  const xml=await response.text(),rows=[];
+  for(const block of (xml.match(/<item>[\s\S]*?<\/item>/g)||[]).slice(0,12)){
+   const title=strip((block.match(/<title>([\s\S]*?)<\/title>/)||[])[1]);
+   const url=strip((block.match(/<link>([\s\S]*?)<\/link>/)||[])[1]);
+   if(title&&url&&/[А-Яа-яЁё]/.test(title))rows.push({id:crypto.createHash('sha256').update(url).digest('hex').slice(0,20),title,url,comments:null,points:null,source:'Российские СМИ'});
+  }
+  return rows;
+ }));
+ for(const result of feeds)if(result.status==='fulfilled')items.push(...result.value);
+ return [...new Map(items.map(x=>[x.id,x])).values()];
 }
 async function russianHeadline(x){
  const title=String(x.title||'').trim();
@@ -103,7 +92,7 @@ async function scan(){
   const candidates=(await sources()).filter(x=>!sent.has(x.id)).map(x=>({...x,rank:score(x)})).filter(x=>x.rank>=29).sort((a,b)=>b.rank-a.rank).slice(0,limit);
   for(const x of candidates){
    const ruTitle=await russianHeadline(x);
-   if(!ruTitle){console.log('Skipping untranslated headline',x.id);continue;}
+   if(!ruTitle||!/[А-Яа-яЁё]/.test(ruTitle)){console.log('Skipping untranslated headline',x.id);continue;}
    x.titleRu=ruTitle;
    sent.add(x.id);news.set(x.id,x);
    const metrics=x.comments!==null?'Комментарии: '+x.comments+'; реакции HN: '+x.points:'Публичных показателей комментариев у RSS нет';
