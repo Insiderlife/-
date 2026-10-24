@@ -80,15 +80,34 @@ async function sources(){
  }
  return items;
 }
+async function russianHeadline(x){
+ const title=String(x.title||'').trim();
+ if(!title)return '';
+ if(!/[A-Za-z]/.test(title) || (!aiKey && /[А-Яа-яЁё]/.test(title)))return title;
+ if(!aiKey)return /[А-Яа-яЁё]/.test(title)?title:null;
+ const messages=[
+  {role:'system',content:'Переведи новостной заголовок на грамотный естественный русский язык для широкой аудитории. Верни только русский заголовок без комментариев, кавычек и форматирования. Названия брендов и имена можно передавать принятыми русскими написаниями. Не добавляй факты и не преувеличивай смысл.'},
+  {role:'user',content:title}
+ ];
+ try{
+  const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{authorization:'Bearer '+aiKey,'content-type':'application/json'},body:JSON.stringify({model:env.OPENAI_MODEL||'gpt-4.1-mini',messages,temperature:0,max_tokens:130})});
+  if(!r.ok)throw new Error('Перевод: '+r.status);
+  const j=await r.json();const result=j.choices?.[0]?.message?.content?.trim();
+  return result&&/[А-Яа-яЁё]/.test(result)?result:null;
+ }catch(e){console.error('TRANSLATE',e.message);return /[А-Яа-яЁё]/.test(title)?title:null;}
+}
 async function scan(){
  if(scanBusy||!token||!owner)return;
  scanBusy=true;
  try{
   const candidates=(await sources()).filter(x=>!sent.has(x.id)).map(x=>({...x,rank:score(x)})).filter(x=>x.rank>=29).sort((a,b)=>b.rank-a.rank).slice(0,limit);
   for(const x of candidates){
+   const ruTitle=await russianHeadline(x);
+   if(!ruTitle){console.log('Skipping untranslated headline',x.id);continue;}
+   x.titleRu=ruTitle;
    sent.add(x.id);news.set(x.id,x);
    const metrics=x.comments!==null?'Комментарии: '+x.comments+'; реакции HN: '+x.points:'Публичных показателей комментариев у RSS нет';
-   await telegram('sendMessage',{chat_id:owner,parse_mode:'HTML',disable_web_page_preview:true,text:'🔥 <b>'+esc(x.title)+'</b>\n\nИсточник: '+esc(x.source)+'\n'+esc(metrics)+'\nОценка массового интереса (прогноз, не факт вирусности): '+x.rank+'/100\n'+esc(x.url),reply_markup:{inline_keyboard:[[{text:'🎬 Сделать Reels',callback_data:'reel:'+x.id},{text:'Пропустить',callback_data:'skip:'+x.id}]]}});
+   await telegram('sendMessage',{chat_id:owner,parse_mode:'HTML',disable_web_page_preview:true,text:'🔥 <b>'+esc(x.titleRu)+'</b>\n\nИсточник: '+esc(x.source)+'\n'+esc(metrics)+'\nОценка массового интереса (прогноз, не факт вирусности): '+x.rank+'/100\n'+esc(x.url),reply_markup:{inline_keyboard:[[{text:'🎬 Сделать Reels',callback_data:'reel:'+x.id},{text:'Пропустить',callback_data:'skip:'+x.id}]]}});
   }
   if(sent.size>1500){sent.clear();news.clear();}
  }catch(e){console.error('SCAN',e);}finally{scanBusy=false;}
@@ -97,7 +116,7 @@ async function scenario(x){
  if(!aiKey) return 'Не задан OPENAI_API_KEY в Render → Environment.';
  const messages=[
  {role:'system',content:'Вы — редактор ВИРУСНЫХ коротких роликов для самой широкой аудитории (не только инвесторов и айтишников) личного канала «Подготовка к 2030 году и добыча нефти XXI века». Напишите ОДИН разговорный сценарий Reels на русском языке строго на 20–30 секунд, 50–70 слов. Один тейк, без ремарок, заголовков, пунктов, эмодзи, указаний монтажа. Структура: 1) сильный честный триггерный хук; 2) раскрытие конкретной новости и польза; 3) очень короткая и естественная связь с подготовкой к 2030 году или поиском нефти XXI века (новые возможности), но без натянутой аналогии; 4) призыв подписаться. Сюжет и тон — вдохновляющие перемены, развитие, движение вперёд, достижения, новые возможности, известные личности. Политику не обсуждать, кроме прямого влияния события на будущее или технологии. Избегайте узкого профессионального жаргона, делайте сюжет понятным любому человеку. Не выдумывайте цифры и цитаты и не делайте категорических выводов из одного заголовка. Если деталей недостаточно, говорите осторожно.'},
- {role:'user',content:'Источник: '+x.source+'\nНовость: '+x.title+'\nСсылка: '+x.url+'\nКомментарии: '+(x.comments??'нет данных')+'\nНапишите сценарий.'}
+ {role:'user',content:'Источник: '+x.source+'\nНовость на русском: '+(x.titleRu||x.title)+'\nСсылка: '+x.url+'\nКомментарии: '+(x.comments??'нет данных')+'\nСценарий напишите исключительно по-русски, включая все пояснения.''}
  ];
  const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{authorization:'Bearer '+aiKey,'content-type':'application/json'},body:JSON.stringify({model:env.OPENAI_MODEL||'gpt-4.1-mini',messages,temperature:0.8,max_tokens:240})});
  if(!r.ok)throw new Error('OpenAI '+r.status+': '+(await r.text()).slice(0,250));
