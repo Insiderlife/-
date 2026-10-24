@@ -38,36 +38,44 @@ function score(x){
  const personalBonus=people.some(k=>t.includes(k))?(future?24:6):0;
  const motivationBonus=forward.reduce((n,k)=>n+(t.includes(k)?5:0),0);
  const nichePenalty=(niche.some(k=>t.includes(k))?28:0)+(politic&&!future?55:politic?16:0);
- const engagement=x.comments===null?0:Math.min(28,Math.log1p(x.comments)*5)+Math.min(12,Math.log1p(x.points||0)*2);
+ const engagement=x.views===null||x.views===undefined?0:Math.min(22,Math.log10(Math.max(1,x.views))*3);
  return Math.max(0,Math.min(95,Math.round(12+Math.min(22,broadPoints)+Math.min(25,hookPoints)+Math.min(18,motivationBonus)+personalBonus+engagement-nichePenalty)));
 }
+function unpackText(html){
+ return strip(String(html||'').replace(/<br\s*\/?>/gi,' ').replace(/<\/p>/gi,' ').replace(/<[^>]+>/g,' ')).replace(/&#(\d+);/g,(_,n)=>String.fromCodePoint(Number(n))).replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+}
+function parseViews(raw){
+ const m=String(raw||'').replace(/\s/g,'').match(/(\d+(?:[.,]\d+)?)([KMBКМ])?/i);
+ if(!m)return null;
+ const unit=(m[2]||'').toUpperCase();
+ return Math.round(Number(m[1].replace(',','.'))*({'K':1000,'К':1000,'M':1000000,'М':1000000,'B':1000000000}[unit]||1));
+}
 async function sources(){
- const items=[];
- const queries=[
- 'site:rbc.ru технологии будущее Маск',
- 'site:tass.ru технологии робот будущего',
- 'site:ria.ru открытия технологии будущее',
- 'site:forbes.ru предприниматели успех технологии',
- 'site:vc.ru новые технологии предприниматель',
- 'site:pikabu.ru необычные открытия технологии',
- 'site:ixbt.com робот Маск технологии',
- 'site:hi-tech.mail.ru технологии открытие',
- 'site:lenta.ru технологии общество будущее',
- 'site:rg.ru профессии будущее технологии'
- ];
- const feeds=await Promise.allSettled(queries.map(async q=>{
-  const response=await fetch('https://news.google.com/rss/search?q='+encodeURIComponent(q+' when:3d')+'&hl=ru&gl=RU&ceid=RU:ru',{signal:AbortSignal.timeout(12000)});
-  if(!response.ok)return [];
-  const xml=await response.text(),rows=[];
-  for(const block of (xml.match(/<item>[\s\S]*?<\/item>/g)||[]).slice(0,12)){
-   const title=strip((block.match(/<title>([\s\S]*?)<\/title>/)||[])[1]);
-   const url=strip((block.match(/<link>([\s\S]*?)<\/link>/)||[])[1]);
-   if(title&&url&&/[А-Яа-яЁё]/.test(title))rows.push({id:crypto.createHash('sha256').update(url).digest('hex').slice(0,20),title,url,comments:null,points:null,source:'Российские СМИ'});
+ const channels=(env.MONITOR_CHANNELS||'rian_ru,breakingmash,banksta').split(',').map(x=>x.trim().replace(/^@/,'')).filter(x=>/^[a-zA-Z0-9_]{5,32}$/.test(x)).slice(0,20);
+ const requests=await Promise.allSettled(channels.map(async channel=>{
+  const response=await fetch('https://t.me/s/'+channel,{headers:{'user-agent':'Mozilla/5.0 (compatible; Viral2030Bot/1.0)'},signal:AbortSignal.timeout(12000)});
+  if(!response.ok)throw new Error(channel+' HTTP '+response.status);
+  const html=await response.text();
+  const segments=html.split(/<div class="tgme_widget_message_wrap/).slice(1);
+  const entries=[];
+  for(const segment of segments){
+   const id=(segment.match(/data-post="([^"]+)"/)||[])[1];
+   const textHtml=(segment.match(/<div class="tgme_widget_message_text[^"]*"[^>]*>([\s\S]*?)<\/div>/)||[])[1];
+   const words=unpackText(textHtml);
+   const viewsText=(segment.match(/<span class="tgme_widget_message_views">([^<]+)<\/span>/)||[])[1];
+   const timestamp=(segment.match(/<time[^>]*datetime="([^"]+)"/)||[])[1];
+   const age=timestamp?Date.now()-new Date(timestamp).getTime():0;
+   if(!id||!words||words.length<65||!/[А-Яа-яЁё]/.test(words)||age>48*3600000)continue;
+   const title=words.slice(0,210).trim();
+   const views=parseViews(viewsText);
+   entries.push({id:'tg'+id.replace(/[^a-z0-9_]/ig,'_'),title,fullText:words.slice(0,2400),url:'https://t.me/'+id,comments:null,points:null,views,source:'@'+channel});
   }
-  return rows;
+  console.log('CHANNEL '+channel+' posts '+entries.length);
+  return entries.slice(-15);
  }));
- for(const result of feeds)if(result.status==='fulfilled')items.push(...result.value);
- return [...new Map(items.map(x=>[x.id,x])).values()];
+ const items=[];
+ for(const result of requests){if(result.status==='fulfilled')items.push(...result.value);else console.error('CHANNEL ERROR',String(result.reason));}
+ return items;
 }
 async function russianHeadline(x){
  const title=String(x.title||'').trim();
@@ -95,7 +103,7 @@ async function scan(){
    if(!ruTitle||!/[А-Яа-яЁё]/.test(ruTitle)){console.log('Skipping untranslated headline',x.id);continue;}
    x.titleRu=ruTitle;
    sent.add(x.id);news.set(x.id,x);
-   const metrics=x.comments!==null?'Комментарии: '+x.comments+'; реакции HN: '+x.points:'Публичных показателей комментариев у RSS нет';
+   const metrics=x.views!==null?'Просмотры: '+x.views.toLocaleString('ru-RU'):'Данные о просмотрах недоступны';
    await telegram('sendMessage',{chat_id:owner,parse_mode:'HTML',disable_web_page_preview:true,text:'🔥 <b>'+esc(x.titleRu)+'</b>\n\nИсточник: '+esc(x.source)+'\n'+esc(metrics)+'\nОценка массового интереса (прогноз, не факт вирусности): '+x.rank+'/100\n'+esc(x.url),reply_markup:{inline_keyboard:[[{text:'🎬 Создать сценарий',callback_data:'reel:'+x.id},{text:'Пропустить',callback_data:'skip:'+x.id}]]}});
   }
   if(sent.size>1500){sent.clear();news.clear();}
